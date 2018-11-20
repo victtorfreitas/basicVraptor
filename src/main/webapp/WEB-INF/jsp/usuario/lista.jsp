@@ -10,6 +10,7 @@
 			<th>Nome</th>
 			<th>E-mail</th>
 			<th>Login</th>
+			<th>Ação</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -19,6 +20,11 @@
 				<td>${u.nome}</td>
 				<td>${u.email}</td>
 				<td>${u.login}</td>
+				<td>
+					<button type="button" class="close" aria-label="Close">
+						<a href="${linkTo[UsuarioController].remove(u)}"><span aria-hidden="true">&times;</span></a>
+					</button>
+				</td>
 			</tr>
 		</c:forEach>
 	</tbody>

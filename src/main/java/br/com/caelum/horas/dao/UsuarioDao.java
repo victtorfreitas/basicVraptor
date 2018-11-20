@@ -1,43 +1,76 @@
 package br.com.caelum.horas.dao;
 
+import java.io.Serializable;
 import java.util.List;
 
-import javax.enterprise.context.RequestScoped;
+import javax.annotation.PostConstruct;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
+import javax.persistence.PersistenceContext;
+import javax.validation.constraints.NotNull;
 
+import br.com.caelum.horas.util.UtilDao;
+import br.com.caelum.horas.util.UtilVerificacao;
 import br.com.caelum.vraptor.modelo.Usuario;
 
-@RequestScoped
-public class UsuarioDao {
+@Stateless
+public class UsuarioDao implements Serializable,Dao<Usuario> {
 
+	private static final long serialVersionUID = 1L;
+
+	@PersistenceContext
 	private EntityManager manager;
+
 	private UtilDao<Usuario> utilDao;
-	
+	private String jpql;
+
+	private DaoImpl<Usuario> dao;
+
 	public UsuarioDao() {
 	}
 
-	@Inject
-	public UsuarioDao(EntityManager manager) {
-		this.manager = manager;
+	@PostConstruct
+	void init() {
 		this.utilDao = new UtilDao<Usuario>(manager);
+		this.dao = new DaoImpl<Usuario>();
+		this.jpql = "select u from Usuario u ";
 	}
-
-	public void adicionar(Usuario usuario) {
-		manager.getTransaction().begin();
-		manager.persist(usuario);
-		manager.getTransaction().commit();
+	@Override
+	public void adiciona(Usuario usuario) {
+		dao.adiciona(usuario);
 	}
 
 	public List<Usuario> lista() {
-		String jpql = "select u from Usuario u ";
-		return utilDao.createQuery(jpql).getResultList();
+		return utilDao.createQueryResultList(this.jpql);
+	}
+	
+	
+	public Usuario busca(String login, String senha) {
+		if (UtilVerificacao.isParams(login, senha)) {
+			this.jpql += "where u.login = ? and u.senha = ?";
+			return utilDao.createQuerySingleResult(this.jpql, login, senha);
+		}
+		return null;
 	}
 
 
-	public Usuario buscar(String login, String senha) {
-		String jpql = "select u from Usuario u where u.login = ? and u.senha = ?";
-		return utilDao.createQuery(jpql,login,senha).getSingleResult();
+	@Override
+	public void remove(Usuario usuario) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public List<Usuario> listaTodos(Usuario entity) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void atualiza(Usuario t) {
+		// TODO Auto-generated method stub
+		
 	}
 }

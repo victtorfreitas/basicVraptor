@@ -1,4 +1,4 @@
-package br.com.caelum.horas.segurança;
+package br.com.caelum.horas.seguranca;
 
 import java.io.Serializable;
 

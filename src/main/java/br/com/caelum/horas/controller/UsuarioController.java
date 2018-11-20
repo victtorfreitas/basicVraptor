@@ -1,10 +1,13 @@
 package br.com.caelum.horas.controller;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 
 import br.com.caelum.horas.dao.UsuarioDao;
-import br.com.caelum.horas.segurança.UsuarioLogado;
+import br.com.caelum.horas.enums.Conexao;
+import br.com.caelum.horas.seguranca.UsuarioLogado;
 import br.com.caelum.vraptor.Controller;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Result;
@@ -19,6 +22,7 @@ public class UsuarioController {
 	private UsuarioDao dao;
 	private Validator validator;
 	private UsuarioLogado usuarioLogado;
+	private List<Usuario> usuarios;
 
 	public UsuarioController() {
 	}
@@ -32,19 +36,35 @@ public class UsuarioController {
 	}
 
 	public void form() {
-
 	}
-
+	
+	@Post
+	public void remove(Usuario usuario) {
+		dao.remove(usuario);
+		usuarios.remove(usuario);
+		result.redirectTo(this).lista();
+	}
+	
 	@IncludeParameters
 	@Post
 	public void adiciona(@Valid Usuario usuario) {
 		validator.onErrorRedirectTo(this).form();
-		dao.adicionar(usuario);
+		dao.adiciona(usuario);
 		result.redirectTo(this).lista();
 	}
 
 	public void lista() {
-		result.include("usuarios", dao.lista());
+		if(!usuarios.isEmpty()) {
+			result.include("usuarios", dao.lista());			
+		}
+		result.include("usuarios",usuarios);			
+		
+	}
+	
+	private void acaoTomada(Usuario user, Conexao status) {
+		if(status.ADICIONA) {
+			
+		}
 	}
 
 }

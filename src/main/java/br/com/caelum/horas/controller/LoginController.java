@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import br.com.caelum.horas.annotations.Open;
 import br.com.caelum.horas.dao.UsuarioDao;
-import br.com.caelum.horas.segurança.UsuarioLogado;
+import br.com.caelum.horas.seguranca.UsuarioLogado;
 import br.com.caelum.vraptor.Controller;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Result;
@@ -33,10 +33,11 @@ public class LoginController {
 	@Open
 	public void form() {
 	}
+	
 	@Open
 	@Post
 	public void login(String login, String senha) {
-		Usuario usuario = dao.buscar(login, senha);
+		Usuario usuario = dao.busca(login, senha);
 		if (usuario != null) {
 			usuarioLogado.fazLogin(usuario);
 			result.redirectTo(IndexController.class).index();
