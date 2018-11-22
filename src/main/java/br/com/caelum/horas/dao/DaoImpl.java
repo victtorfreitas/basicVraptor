@@ -7,14 +7,22 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
+import br.com.caelum.horas.util.UtilDao;
+
 public class DaoImpl<T> implements Serializable, Dao<T> {
 
 	private static final long serialVersionUID = 1L;
 
-	@Inject
 	private EntityManager em;
 
+	private UtilDao<T> utilDao;
+
 	public DaoImpl() {
+	}
+
+	public DaoImpl(EntityManager manager) {
+		this.em = manager;
+		this.utilDao = new UtilDao<T>(this.em);
 	}
 
 	@Override
@@ -35,9 +43,12 @@ public class DaoImpl<T> implements Serializable, Dao<T> {
 	}
 
 	@Override
-	public List<T> listaTodos(T entity) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<T> listaTodos(String jpql) {
+		return utilDao.createQueryResultList(jpql);
+	}
+	
+	public T lista(String jpql, Object... params) {
+		return utilDao.createQuerySingleResult(jpql, params);
 	}
 
 }

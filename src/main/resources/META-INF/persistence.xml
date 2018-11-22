@@ -6,7 +6,7 @@ http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
 	
 	<persistence-unit name="alura_horas" transaction-type="JTA">
 
-		<jta-data-source>java:jboss/datasources/alura_horasDS</jta-data-source>
+		<jta-data-source>alura_horasDS</jta-data-source>
 		
 		<class>br.com.caelum.vraptor.modelo.Usuario</class>
 

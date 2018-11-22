@@ -1,6 +1,7 @@
 package br.com.caelum.horas.controller;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import br.com.caelum.horas.annotations.Open;
 import br.com.caelum.horas.dao.UsuarioDao;
@@ -19,7 +20,7 @@ public class LoginController {
 	private UsuarioLogado usuarioLogado;
 	private Result result;
 	private Validator validator;
-	
+
 	public LoginController() {
 	}
 
@@ -30,22 +31,26 @@ public class LoginController {
 		this.result = result;
 		this.validator = validator;
 	}
+
 	@Open
 	public void form() {
 	}
-	
+
 	@Open
 	@Post
-	public void login(String login, String senha) {
-		Usuario usuario = dao.busca(login, senha);
-		if (usuario != null) {
-			usuarioLogado.fazLogin(usuario);
-			result.redirectTo(IndexController.class).index();
+	public void login(@NotNull String login, @NotNull String senha) {
+		if (!validator.hasErrors()) {
+			Usuario usuario = dao.busca(login, senha);
+			if (usuario != null) {
+				usuarioLogado.fazLogin(usuario);
+				result.redirectTo(IndexController.class).index();
+			}
 		} else {
 			validator.add(new SimpleMessage("login_invalido", "Login ou senha incorretos!"));
-			validator.onErrorForwardTo(this).form();
+			validator.onErrorRedirectTo(this).form();
 		}
 	}
+
 	@Open
 	public void deslogar() {
 		usuarioLogado.deslogar();

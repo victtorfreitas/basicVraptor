@@ -2,11 +2,11 @@ package br.com.caelum.horas.controller;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
 import br.com.caelum.horas.dao.UsuarioDao;
-import br.com.caelum.horas.enums.Conexao;
 import br.com.caelum.horas.seguranca.UsuarioLogado;
 import br.com.caelum.vraptor.Controller;
 import br.com.caelum.vraptor.Post;
@@ -22,7 +22,7 @@ public class UsuarioController {
 	private UsuarioDao dao;
 	private Validator validator;
 	private UsuarioLogado usuarioLogado;
-	private List<Usuario> usuarios;
+	private List<Usuario> usuarios = null;
 
 	public UsuarioController() {
 	}
@@ -38,13 +38,14 @@ public class UsuarioController {
 	public void form() {
 	}
 	
+	@IncludeParameters
 	@Post
 	public void remove(Usuario usuario) {
 		dao.remove(usuario);
 		usuarios.remove(usuario);
 		result.redirectTo(this).lista();
 	}
-	
+
 	@IncludeParameters
 	@Post
 	public void adiciona(@Valid Usuario usuario) {
@@ -52,19 +53,16 @@ public class UsuarioController {
 		dao.adiciona(usuario);
 		result.redirectTo(this).lista();
 	}
-
-	public void lista() {
-		if(!usuarios.isEmpty()) {
-			result.include("usuarios", dao.lista());			
-		}
-		result.include("usuarios",usuarios);			
-		
+	public void vim() {
+		System.out.println("2222222222222222222");
 	}
-	
-	private void acaoTomada(Usuario user, Conexao status) {
-		if(status.ADICIONA) {
-			
+	public void lista() {
+		if (usuarios == null || !usuarios.isEmpty()) {
+			usuarios = dao.lista();
+			result.include("usuarios", this.usuarios);
 		}
+		result.include("usuarios", usuarios);
+
 	}
 
 }

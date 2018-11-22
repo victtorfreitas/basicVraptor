@@ -11,7 +11,6 @@ import javax.persistence.TypedQuery;
 public class UtilDao<T> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@Inject
 	private EntityManager manager;
 	private T objetoTipo = (T) new Object();
 
@@ -68,10 +67,11 @@ public class UtilDao<T> implements Serializable {
 
 	public List<T> createQueryResultList(String jpql, Object... params) {
 		TypedQuery<T> query = createQuery(jpql, params);
-		if (query != null) {
+		try {
 			return query.getResultList();
+		} catch (NoResultException e) {
+			return null;
 		}
-		return null;
 	}
 
 }

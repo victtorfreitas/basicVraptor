@@ -22,7 +22,7 @@
 				<td>${u.login}</td>
 				<td>
 					<button type="button" class="close" aria-label="Close">
-						<a href="${linkTo[UsuarioController].remove(u)}"><span aria-hidden="true">&times;</span></a>
+						<a href="${usuarioController.vim()}"><span aria-hidden="true">&times;</span></a>
 					</button>
 				</td>
 			</tr>
