@@ -14,16 +14,14 @@
 		</tr>
 	</thead>
 	<tbody>
-		<c:forEach items="${usuarios}" var="u">
+		<c:forEach items="${usuarios}" var="usuario">
 			<tr>
-				<td>${u.id}</td>
-				<td>${u.nome}</td>
-				<td>${u.email}</td>
-				<td>${u.login}</td>
+				<td>${usuario.id}</td>
+				<td>${usuario.nome}</td>
+				<td>${usuario.email}</td>
+				<td>${usuario.login}</td>
 				<td>
-					<button type="button" class="close" aria-label="Close">
-						<a href="${usuarioController.vim()}"><span aria-hidden="true">&times;</span></a>
-					</button>
+					<a href="${linkTo[UsuarioController].remove(usuario.id)}">Remover</a>
 				</td>
 			</tr>
 		</c:forEach>

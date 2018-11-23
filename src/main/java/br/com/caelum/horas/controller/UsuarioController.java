@@ -2,13 +2,13 @@ package br.com.caelum.horas.controller;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
 import br.com.caelum.horas.dao.UsuarioDao;
 import br.com.caelum.horas.seguranca.UsuarioLogado;
 import br.com.caelum.vraptor.Controller;
+import br.com.caelum.vraptor.Get;
 import br.com.caelum.vraptor.Post;
 import br.com.caelum.vraptor.Result;
 import br.com.caelum.vraptor.interceptor.IncludeParameters;
@@ -38,11 +38,10 @@ public class UsuarioController {
 	public void form() {
 	}
 	
-	@IncludeParameters
-	@Post
-	public void remove(Usuario usuario) {
-		dao.remove(usuario);
-		usuarios.remove(usuario);
+	@Get("{id}")
+	public void remove(int id) {
+		dao.remove(id);
+		usuarios.remove(id);
 		result.redirectTo(this).lista();
 	}
 
@@ -53,6 +52,7 @@ public class UsuarioController {
 		dao.adiciona(usuario);
 		result.redirectTo(this).lista();
 	}
+	
 	public void vim() {
 		System.out.println("2222222222222222222");
 	}

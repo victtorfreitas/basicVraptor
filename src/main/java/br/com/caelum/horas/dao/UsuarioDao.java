@@ -48,4 +48,9 @@ public class UsuarioDao implements Serializable {
 		dao.remove(usuario);
 	}
 
+	public void remove(int id) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
