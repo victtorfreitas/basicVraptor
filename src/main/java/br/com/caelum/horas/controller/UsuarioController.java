@@ -2,6 +2,7 @@ package br.com.caelum.horas.controller;
 
 import java.util.List;
 
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
@@ -22,6 +23,7 @@ public class UsuarioController {
 	private UsuarioDao dao;
 	private Validator validator;
 	private UsuarioLogado usuarioLogado;
+	@SessionScoped
 	private List<Usuario> usuarios = null;
 
 	public UsuarioController() {
@@ -41,7 +43,6 @@ public class UsuarioController {
 	@Get("{id}")
 	public void remove(int id) {
 		dao.remove(id);
-		usuarios.remove(id);
 		result.redirectTo(this).lista();
 	}
 
@@ -49,16 +50,13 @@ public class UsuarioController {
 	@Post
 	public void adiciona(@Valid Usuario usuario) {
 		validator.onErrorRedirectTo(this).form();
-		dao.adiciona(usuario);
+		dao.save(usuario);
 		result.redirectTo(this).lista();
 	}
 	
-	public void vim() {
-		System.out.println("2222222222222222222");
-	}
 	public void lista() {
 		if (usuarios == null || !usuarios.isEmpty()) {
-			usuarios = dao.lista();
+			usuarios = dao.findAll();
 			result.include("usuarios", this.usuarios);
 		}
 		result.include("usuarios", usuarios);

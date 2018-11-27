@@ -38,9 +38,9 @@ public class LoginController {
 
 	@Open
 	@Post
-	public void login(@NotNull String login, @NotNull String senha) {
+	public void login(@NotNull Usuario usuario) {
 		if (!validator.hasErrors()) {
-			Usuario usuario = dao.busca(login, senha);
+			usuario = dao.loginCheck(usuario);
 			if (usuario != null) {
 				usuarioLogado.fazLogin(usuario);
 				result.redirectTo(IndexController.class).index();
