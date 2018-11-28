@@ -10,25 +10,20 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.transaction.Transactional;
 
-import org.hibernate.criterion.Restrictions;
-
+import br.com.caelum.horas.enums.SQLenum;
 import br.com.caelum.horas.util.UtilVerificacao;
 
 @Stateless
 public class GenericDao<T> implements Serializable, Dao<T> {
 
 	private static final long serialVersionUID = 1L;
+
 	@PersistenceContext
 	private EntityManager em;
 
 	private Class<T> classeObject;
-	
-	private CriteriaBuilder criteriaBuilder;
 
 	/**
 	 * Construtor apenas para Framework
@@ -41,13 +36,10 @@ public class GenericDao<T> implements Serializable, Dao<T> {
 	/**
 	 * Construtor Padrão
 	 * 
-	 * @param manager deve já estar instanciado
-	 * @param classe  Classe do Entity
+	 * @param classe Classe do Entity
 	 */
-	public GenericDao(EntityManager manager, Class<T> classeObject) {
-		this.em = manager;
+	public GenericDao(Class<T> classeObject) {
 		this.classeObject = classeObject;
-		this.criteriaBuilder = em.getCriteriaBuilder();
 	}
 
 	// Metodos sobrescritos da interface
@@ -55,6 +47,11 @@ public class GenericDao<T> implements Serializable, Dao<T> {
 	@Override
 	public T findById(int id) {
 		return em.find(this.classeObject, id);
+	}
+
+	@Override
+	public T findByParams(String where, Object... params) {
+		return getSingleResult(queryWithWhere(where, params));
 	}
 
 	@Transactional
@@ -83,17 +80,25 @@ public class GenericDao<T> implements Serializable, Dao<T> {
 
 	@Override
 	public List<T> findAll() {
-		return getResultList(getTypeQuery(getCriteriaQuery()));
+		return getResultList(createQueryBasic());
 	}
 
 	@Override
-	public List<T> findAll(Object... params) {
-		TypedQuery<T> typedQuery = getTypeQuery(getCriteriaQuery());
-		setParams(typedQuery, params);
-		return getResultList(typedQuery);
+	public List<T> findAll(String where, Object... params) {
+		return getResultList(queryWithWhere(where, params));
 	}
 
-	// Metodos para tratamento das Query
+	// Metodos PRIVADOS para tratamento das Query
+
+	/**
+	 * Cria um TypeQuery com where agregado
+	 * @param where que será agregado
+	 * @param params Valores que alimentarão o where
+	 * @return Um typeQuery carregado com todos os valores setados
+	 */
+	private TypedQuery<T> queryWithWhere(String where, Object... params) {
+		return createQuery(sqlBasic() + where, params);
+	}
 
 	/**
 	 * Implementa os parametros na Query
@@ -103,22 +108,20 @@ public class GenericDao<T> implements Serializable, Dao<T> {
 	 */
 	private void setParams(TypedQuery<T> query, Object... params) {
 		if (UtilVerificacao.isParams(params)) {
-			for (int i = 1; i <= params.length; i++) {
-				query.setParameter(i, params[i]);
+			for (int i = 0; i <= params.length; i++) {
+				query.setParameter(i+1, params[i]);
 			}
 		}
 	}
 
 	/**
-	 * Trata o possível erro da Query não achar nenhum resultado<br>
-	 * E retorna uma lista buscada no banco
-	 * 
-	 * @param query
-	 * @return Lista da pesquisa no BD
+	 * Faz a busca no banco e retorna um unico Objeto do tipo T
+	 * @param typedQuery é a query já preparada
+	 * @return unico objeto buscado no banco
 	 */
-	private List<T> getResultList(TypedQuery<T> query) {
+	private T getSingleResult(TypedQuery<T> typedQuery) {
 		try {
-			return query.getResultList();
+			return typedQuery.getSingleResult();
 		} catch (NoResultException e) {
 			Logger.getLogger(GenericDao.class.getName()).log(Level.SEVERE, null, e);
 		}
@@ -126,28 +129,63 @@ public class GenericDao<T> implements Serializable, Dao<T> {
 	}
 
 	/**
-	 * Cria uma query select * from da classe selecionada
-	 * 
-	 * @param em     EntityManager instanciado
-	 * @param classe Que deve criar a query
-	 * @return TypeQuery do Tipo passado
+	 * Faz a busca no banco e retorna uma lista de objetos do tipo T
+	 * @param typedQuery é a query já preparada
+	 * @return lista de objetos buscado no banco
 	 */
-	private TypedQuery<T> getTypeQuery(CriteriaQuery<T> criteriaQuery) {
-		return em.createQuery(criteriaQuery);
-	}
-
-	public CriteriaQuery<T> getCriteriaQuery() {
-		CriteriaQuery<T> query = this.criteriaBuilder.createQuery(this.classeObject);
-		CriteriaQuery<T> criteriaQuery = query.select(query.from(this.classeObject));
-		return criteriaQuery;
-	}
-
-	private void getCriteriaParamsSeted(Object... params) {
-		CriteriaQuery<T> criteriaQuery = getCriteriaQuery();
-		for(int i =1 ; i<= params.length; i++) {
-			CriteriaQuery<T> where = criteriaQuery.where(criteriaBuilder.equal( (Expression<?>) params[i], criteriaBuilder.parameter(this.classeObject)));
+	private List<T> getResultList(TypedQuery<T> typedQuery) {
+		try {
+			return typedQuery.getResultList();
+		} catch (NoResultException e) {
+			Logger.getLogger(GenericDao.class.getName()).log(Level.SEVERE, null, e);
 		}
-		
+		return null;
+	}
+
+	/**
+	 * Metodo que cria uma Query
+	 * 
+	 * @param jpql   SQL Referente a Query
+	 * @param params Parametros da query
+	 * @return retorna um TypedQuery podendo pegar Lista ou Single apartir disso
+	 */
+	private TypedQuery<T> createQuery(String jpql, Object... params) {
+		TypedQuery<T> query = createQuery(jpql);
+		setParams(query, params);
+		return query;
+	}
+
+	/**
+	 * Metodo que cria uma Query (Sem parametros)
+	 * 
+	 * @param jpql SQL Referente a Query
+	 * @return retorna um TypedQuery podendo pegar Lista ou Single apartir disso
+	 */
+	private TypedQuery<T> createQuery(String jpql) {
+		TypedQuery<T> query = (TypedQuery<T>) em.createQuery(jpql, classeObject);
+		return query;
+	}
+	
+	/**
+	 * Cria uma query basica 
+	 * @return o TypeQuery basico criado
+	 */
+	private TypedQuery<T> createQueryBasic() {
+		return createQuery(sqlBasic());
+	}
+	/**
+	 * Verifica qual sqlEnum equivale ao objeto classeObject <br>
+	 * E com isso retorna a queryBasic que deve ser usada
+	 * @return queryBasica que deve ser utilizada
+	 */
+	private String sqlBasic() {
+		for (SQLenum sqlEnum : SQLenum.values()) {
+			if (sqlEnum.getClasse().equals(classeObject)) {
+				return sqlEnum.getQuery();
+			}
+		}
+		return null;
+
 	}
 
 }

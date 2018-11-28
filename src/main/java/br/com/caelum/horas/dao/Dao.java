@@ -1,15 +1,6 @@
 package br.com.caelum.horas.dao;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaQuery;
-
-import br.com.caelum.horas.util.UtilVerificacao;
 
 /**
  * Interface padronizante DAO
@@ -17,7 +8,7 @@ import br.com.caelum.horas.util.UtilVerificacao;
  * @author Victtor
  * @param <T> Entity que será manipulada
  */
-public interface Dao<T> {
+public interface Dao<T>{
 	/**
 	 * Busca uma objeto através do ID no banco de dados
 	 * 
@@ -25,6 +16,14 @@ public interface Dao<T> {
 	 * @return objeto buscado no banco de dados
 	 */
 	public T findById(int id);
+	
+	/**
+	 * Busca por parametros feitos na where
+	 * @param where preparado anteriomente
+	 * @param params valores para o where 
+	 * @return Objeto do tipo T
+	 */
+	public T findByParams(String where, Object... params);
 
 	/**
 	 * Persiste um objeto no banco de dados
@@ -64,10 +63,11 @@ public interface Dao<T> {
 	/**
 	 * Busca todos os Elementos da Entity que obedeça o Where
 	 * 
+	 * @param where Necessario o where utilizado
 	 * @param params Parametros para a query
 	 * @return Lista dos elementos
 	 */
-	public List<T> findAll(Object... params);
+	public List<T> findAll(String where, Object... params);
 
 
 }
